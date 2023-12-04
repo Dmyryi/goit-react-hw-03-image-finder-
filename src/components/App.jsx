@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import SearchBar from './Searchbar/Searchbar';
+
 import Modal from './Modal/Modal';
 import ImageGallery from './ImageGallery/ImageGallery';
 import Loader from './Buttons/Loader';
 import Button from './Buttons/Button';
-import styles from '../components/Searchbar/Searchbar.module.css';
+import styles from './Searchbar/Searchbar.module.css';
 
 export default class App extends Component {
   state = {
