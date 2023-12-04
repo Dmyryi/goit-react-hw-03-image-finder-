@@ -1,0 +1,22 @@
+.searchbar {
+    background-color: #f0f0f0;
+    padding: 10px;
+}
+
+.form {
+    display: flex;
+    justify-content: space-between;
+}
+
+.button {
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+}
+
+.input {
+    flex: 1;
+    padding: 10px;
+}
