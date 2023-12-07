@@ -1,98 +1,139 @@
 import React, { Component } from 'react';
 
+import { CirclesWithBar } from 'react-loader-spinner';
+
+import Searchbar from './SearchBar/SearchBar';
+import ImageGallery from './GalleryImage/ImageGallery';
+import Button from './Button/Button';
 import Modal from './Modal/Modal';
-import ImageGallery from './ImageGallery/ImageGallery';
-import Loader from './Buttons/Loader';
-import Button from './Buttons/Button';
-import styles from './Searchbar/Searchbar.module.css';
+import { getImages } from '../api';
 
-export default class App extends Component {
+class App extends Component {
   state = {
+    searchWords: '',
     images: [],
-    search: '',
-    page: 1,
-    isLoading: false,
     showModal: false,
-    selectedImage: '',
+    modalImage: '',
+    showLoader: false,
+    currentPage: 1,
   };
 
-  handleChange = event => {
-    this.setState({ search: event.currentTarget.value });
-  };
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.searchWords !== this.state.searchWords) {
+      this.getImages(this.state.searchWords, this.state.currentPage);
+    }
+  }
 
-  handleFetch = () => {
-    const { search, page } = this.state;
+  // ... existing methods
 
-    this.setState({ isLoading: true });
-
-    const apiKey = '22964676-aac3c7ed7126080ab92aa911f';
-
-    fetch(
-      `https://pixabay.com/api/?q=${search}&page=${page}&key=${apiKey}&image_type=photo&orientation=horizontal&per_page=12`
-    )
-      .then(res => res.json())
-      .then(data => {
+  getImages(words, page) {
+    this.loaderToggle(true);
+    getImages(words, page)
+      .then(response => {
+        this.pushImagesToState(response);
+        this.loaderToggle(false);
         this.setState(prevState => ({
-          images: [...prevState.images, ...data.hits],
+          currentPage: prevState.currentPage + 1,
         }));
       })
-      .catch(error => console.error('Error fetching images:', error))
-      .finally(() => this.setState({ isLoading: false }));
+      .catch(error => {
+        console.error('Error fetching images:', error);
+        this.loaderToggle(false);
+      });
+  }
+
+  toggleModal = () => {
+    this.setState(({ showModal }) => ({ showModal: !showModal }));
   };
 
-  handleSubmit = (event, query) => {
+  pushImagesToState = response => {
+    const imagesFromResponse = response.data.hits;
+    let newSearchArray = [];
+    newSearchArray = [...this.state.images, ...imagesFromResponse];
+    this.setState(({ images }) => ({ images: newSearchArray }));
+  };
+  setModalImage = linkImg => {
+    return this.setState(({ modalImage }) => ({ modalImage: linkImg }));
+  };
+  openLargeImage = linkImg => {
+    this.setModalImage(linkImg);
+    this.toggleModal();
+  };
+
+  loaderToggle = bool => {
+    return this.setState(({ showLoader }) => ({ showLoader: bool }));
+  };
+
+  // getImages(words, page) {
+  //   this.loaderToggle(true);
+  //   axios
+  //     .get(
+  //       `https://pixabay.com/api/?q=${words}&page=${page}&key=${apiKey}&image_type=photo&orientation=horizontal&per_page=12`
+  //     )
+  //     .then(response => {
+  //       this.pushImagesToState(response);
+  //       this.loaderToggle(false);
+  //       this.setState(prevState => ({
+  //         currentPage: prevState.currentPage + 1,
+  //       }));
+  //     });
+  // }
+
+  searchFormSubmit = event => {
     event.preventDefault();
-    this.setState({ page: 1, images: [] });
-    this.handleFetch();
+    this.setState({
+      searchWords: '',
+      images: [],
+      showModal: false,
+      modalImage: '',
+      currentPage: 1,
+    });
+    const searchWordsValue = event.target[1].value;
+
+    this.setState({ searchWords: searchWordsValue });
+    const page = 1;
+    this.getImages(searchWordsValue, page);
+    event.target.reset();
   };
 
-  updatePage = () => {
-    this.setState(prevState => ({ page: prevState.page + 1 }));
-    this.handleFetch();
+  loadMoreFn = () => {
+    this.loaderToggle(true);
+    this.getImages(this.state.searchWords, this.state.currentPage);
   };
-
-  openModal = imageUrl => {
-    this.setState({ showModal: true, selectedImage: imageUrl });
-  };
-
-  closeModal = () => {
-    this.setState({ showModal: false, selectedImage: '' });
-  };
-
   render() {
-    const { images, isLoading, showModal, selectedImage } = this.state;
     return (
-      <div>
-        <header className={styles.searchbar}>
-          <form onSubmit={this.handleSubmit} className={styles.form}>
-            <button type="submit" className={styles.button}>
-              <span>Search</span>
-            </button>
-
-            <input
-              className="input"
-              type="text"
-              autoComplete="off"
-              autoFocus
-              placeholder="Search images and photos"
-              value={this.state.search}
-              onChange={this.handleChange}
-            />
-          </form>
-        </header>
-
-        <ImageGallery images={images} onImageClick={this.openModal} />
-
-        {isLoading && <Loader />}
-
-        {images.length > 0 && !isLoading && (
-          <Button onLoadMore={this.updatePage} />
+      <div className="App">
+        {this.state.showModal && (
+          <Modal
+            closeFn={this.toggleModal}
+            loader={this.loaderToggle}
+            id="modal-root"
+          >
+            <img src={this.state.modalImage} alt="modal" />
+          </Modal>
         )}
+        <Searchbar onSubmit={this.searchFormSubmit} />
 
-        {showModal && (
-          <Modal imageUrl={selectedImage} onClose={this.closeModal} />
+        {this.state.searchWords !== '' && (
+          <ImageGallery
+            loader={this.loaderToggle}
+            imagesArray={this.state.images}
+            modalFn={this.openLargeImage}
+          ></ImageGallery>
         )}
+        {this.state.showLoader && (
+          <CirclesWithBar
+            className="spin"
+            type="Bars"
+            color="#00BFFF"
+            height={80}
+            width={80}
+          />
+        )}
+        {this.state.searchWords !== '' && <Button fn={this.loadMoreFn} />}
       </div>
     );
   }
 }
+
+export default App;
