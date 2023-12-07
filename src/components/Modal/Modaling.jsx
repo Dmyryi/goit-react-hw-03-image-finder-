@@ -1,10 +1,8 @@
 import React, { Component } from 'react';
-
-const modalRoot = document.querySelector('#modal-root');
+import styles from './Modal.module.css';
 
 class Modal extends Component {
   componentDidMount() {
-    console.log('Modal componentdidMount');
     window.addEventListener('keydown', this.handleKeyDown);
   }
 
@@ -20,19 +18,16 @@ class Modal extends Component {
   };
 
   componentWillUnmount() {
-    console.log('Modal componentWillUnmount');
     window.removeEventListener('keydown', this.handleKeyDown);
   }
 
   render() {
     return (
-      (
-        <div className="Overlay" onClick={this.handleBackdrope}>
-          <div className="Modal">{this.props.children}</div>
-        </div>
-      ),
-      modalRoot
+      <div className={styles.Overlay} onClick={this.handleBackdrope}>
+        <div className={styles.Modal}>{this.props.children}</div>
+      </div>
     );
+    // modalRoot
   }
 }
 export default Modal;

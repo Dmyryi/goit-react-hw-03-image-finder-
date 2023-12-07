@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-
+import styles from './ImageGallery.module.css';
 import GalleryImageItem from './GalleryImageItem';
 
 class ImageGallery extends Component {
@@ -9,7 +9,7 @@ class ImageGallery extends Component {
 
   render() {
     return (
-      <ul className="ImageGallery">
+      <ul className={styles.ImageGallery}>
         {this.props.imagesArray.map((image, idx) => {
           return (
             <GalleryImageItem

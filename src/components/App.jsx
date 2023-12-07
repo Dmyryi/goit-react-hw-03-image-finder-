@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 
 import { CirclesWithBar } from 'react-loader-spinner';
-
+import styles from './App.module.css';
 import Searchbar from './SearchBar/SearchBar';
 import ImageGallery from './GalleryImage/ImageGallery';
 import Button from './Button/Button';
-import Modal from './Modal/Modal';
+import Modaling from './Modal/Modaling';
 import { getImages } from '../api';
 
 class App extends Component {
@@ -64,21 +64,6 @@ class App extends Component {
     return this.setState(({ showLoader }) => ({ showLoader: bool }));
   };
 
-  // getImages(words, page) {
-  //   this.loaderToggle(true);
-  //   axios
-  //     .get(
-  //       `https://pixabay.com/api/?q=${words}&page=${page}&key=${apiKey}&image_type=photo&orientation=horizontal&per_page=12`
-  //     )
-  //     .then(response => {
-  //       this.pushImagesToState(response);
-  //       this.loaderToggle(false);
-  //       this.setState(prevState => ({
-  //         currentPage: prevState.currentPage + 1,
-  //       }));
-  //     });
-  // }
-
   searchFormSubmit = event => {
     event.preventDefault();
     this.setState({
@@ -102,15 +87,15 @@ class App extends Component {
   };
   render() {
     return (
-      <div className="App">
+      <div className={styles.App}>
         {this.state.showModal && (
-          <Modal
+          <Modaling
             closeFn={this.toggleModal}
             loader={this.loaderToggle}
             id="modal-root"
           >
             <img src={this.state.modalImage} alt="modal" />
-          </Modal>
+          </Modaling>
         )}
         <Searchbar onSubmit={this.searchFormSubmit} />
 
@@ -123,7 +108,7 @@ class App extends Component {
         )}
         {this.state.showLoader && (
           <CirclesWithBar
-            className="spin"
+            className={styles.spin}
             type="Bars"
             color="#00BFFF"
             height={80}

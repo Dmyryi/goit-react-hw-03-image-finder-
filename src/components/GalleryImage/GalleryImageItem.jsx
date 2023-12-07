@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
-
+import styles from './ImageGallery.module.css';
 class ImageGalleryItem extends Component {
   static defaultProps = { imageLink: ' ', imageAlt: ' ' };
 
   render() {
     return (
-      <li className="ImageGalleryItem">
+      <li className={styles.ImageGalleryItem}>
         <img
           onClick={e => {
             this.props.modalFn(e.target.attributes[2].value);
@@ -14,7 +14,7 @@ class ImageGalleryItem extends Component {
           src={this.props.imageLink}
           alt={this.props.imageAlt}
           data-large={this.props.largeImageURL}
-          className="ImageGalleryItem-image"
+          className={styles.ImageGalleryItem_image}
         />
       </li>
     );

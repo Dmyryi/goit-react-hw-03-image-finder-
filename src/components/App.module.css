@@ -1,0 +1,15 @@
+/*
+     * Стилі компонента App
+     */
+
+.App {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-gap: 16px;
+    padding-bottom: 24px;
+}
+
+.spin {
+    margin-left: auto;
+    margin-right: auto;
+}
