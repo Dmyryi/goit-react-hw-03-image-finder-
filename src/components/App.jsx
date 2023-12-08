@@ -6,7 +6,7 @@ import Searchbar from './SearchBar/SearchBar';
 import ImageGallery from './GalleryImage/ImageGallery';
 import Button from './Button/Button';
 import Modaling from './Modal/Modaling';
-import { getImages } from '../api';
+import { fetchImages } from '../api';
 
 class App extends Component {
   state = {
@@ -15,32 +15,35 @@ class App extends Component {
     showModal: false,
     modalImage: '',
     showLoader: false,
+    loadMore: false,
     currentPage: 1,
+    totalHits: 0,
   };
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.searchWords !== this.state.searchWords) {
-      this.getImages(this.state.searchWords, this.state.currentPage);
+    if (
+      prevState.searchWords !== this.state.searchWords ||
+      prevState.currentPage !== this.state.currentPage
+    ) {
+      this.loaderToggle(true);
+      fetchImages(this.state.searchWords, this.state.currentPage)
+        .then(response => {
+          this.pushImagesToState(response);
+          this.loaderToggle(false);
+          this.setState(prevState => ({
+            totalHits: response.data.totalHits,
+            loadMore:
+              prevState.currentPage < Math.ceil(response.data.totalHits / 12),
+          }));
+        })
+        .catch(error => {
+          console.error('Error fetching images:', error);
+          this.loaderToggle(false);
+        });
     }
   }
 
   // ... existing methods
-
-  getImages(words, page) {
-    this.loaderToggle(true);
-    getImages(words, page)
-      .then(response => {
-        this.pushImagesToState(response);
-        this.loaderToggle(false);
-        this.setState(prevState => ({
-          currentPage: prevState.currentPage + 1,
-        }));
-      })
-      .catch(error => {
-        console.error('Error fetching images:', error);
-        this.loaderToggle(false);
-      });
-  }
 
   toggleModal = () => {
     this.setState(({ showModal }) => ({ showModal: !showModal }));
@@ -48,6 +51,7 @@ class App extends Component {
 
   pushImagesToState = response => {
     const imagesFromResponse = response.data.hits;
+    console.log(response.data);
     let newSearchArray = [];
     newSearchArray = [...this.state.images, ...imagesFromResponse];
     this.setState(({ images }) => ({ images: newSearchArray }));
@@ -76,14 +80,15 @@ class App extends Component {
     const searchWordsValue = event.target[1].value;
 
     this.setState({ searchWords: searchWordsValue });
-    const page = 1;
-    this.getImages(searchWordsValue, page);
+
     event.target.reset();
   };
 
   loadMoreFn = () => {
     this.loaderToggle(true);
-    this.getImages(this.state.searchWords, this.state.currentPage);
+    this.setState(prevState => ({
+      currentPage: prevState.currentPage + 1,
+    }));
   };
   render() {
     return (
@@ -115,7 +120,8 @@ class App extends Component {
             width={80}
           />
         )}
-        {this.state.searchWords !== '' && <Button fn={this.loadMoreFn} />}
+
+        {this.state.loadMore && <Button fn={this.loadMoreFn} />}
       </div>
     );
   }
